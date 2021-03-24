@@ -1,0 +1,23 @@
+language: generic
+sudo: true
+services:
+  - docker
+
+before_install:
+  - docker build -t erik159/docker-overly-complicated-learning -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true erik159/docker-overly-complicated-learning npm test
+
+after_success:
+  - docker build -t erik159/docker-overly-complicated-learning-client ./client
+  - docker build -t erik159/docker-overly-complicated-learning-nginx ./nginx
+  - docker build -t erik159/docker-overly-complicated-learning-server ./server
+  - docker build -t erik159/docker-overly-complicated-learning-worker ./worker
+  # Log to docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Push images to docker hub
+  - docker push erik159/docker-overly-complicated-learning-client
+  - docker push erik159/docker-overly-complicated-learning-nginx
+  - docker push erik159/docker-overly-complicated-learning-server
+  - docker push erik159/docker-overly-complicated-learning-worker
